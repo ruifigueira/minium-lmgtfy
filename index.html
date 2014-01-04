@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.css">
+    <style type="text/css">
+    .cursor {
+      width: 64px;
+      height: 64px;
+    }
+
+    video {
+      height: 385px;
+      width: 684px;
+      padding-bottom: 24px;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container" ng-controller="SendMessageCtrl">
+      <video id="video" preload="auto" class="center-block">
+        <source src="minium.mp4" type='video/mp4' />
+      </video>
+      <form role="form">
+        <div class="form-group">
+          <input type="text" id="message" name="message" class="form-control input-lg" autocomplete="off">
+        </div>
+        <button type="submit" class="btn btn-lg btn-primary center-block" data-toggle="popover">Search Google</button>
+      </form>
+      <img src="cursor.png" id="cursor" class="cursor" />
+    </div>
+    <!-- Scripts -->
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-url-parser/2.2.1/purl.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <script>
+    jQuery(function($) {
+      $.fn.animatePosition = function(props, duration) {
+        var mergedProps = $.extend({}, props, {  
+          using: function(css, calc) {
+            $(this).animate(css, duration, "easeOutQuad");
+          }
+        });
+        return $(this).position(mergedProps);
+      };
+
+      $.fn.repeat = function(n, fn) {
+        var that = this;
+        for (var i = 0; i < n; i++) {
+          that = fn.call(that, i);
+        }
+        return that;
+      };
+
+      var url = $.url(window.location.toString());
+      var msg = url.param("msg") ? url.param("msg") : "Hello Minium!";
+      
+      // cursor initial position
+      $("#cursor")
+        .position({
+          my: "left top",
+          at: "right bottom",
+          of: "#video"
+        });
+
+      $("#video").on("play", function() {
+        console.debug("Playing...");
+
+        // animate cursor
+        $("#cursor")
+          .delay(1000)
+          .animatePosition({
+            my: "center top",
+            at: "left+5% center+25%",
+            of: "#message"
+          }, 1000)
+          .delay(3000)
+          .animatePosition({
+            my: "left top",
+            at: "center center+25%",
+            of: ":submit",
+          }, 500);
+
+        // animate message field
+        var startTime = 3200, endTime = 4200;
+
+        $("#message")
+          .delay(2000)
+          .queue(function() {
+            $(this).focus().dequeue();          
+          })
+          .delay(startTime - 2000)
+          .repeat(msg.length, function(i) {
+            return this.queue(function() {
+              $(this).val(msg.substr(0, i + 1)).dequeue();;  
+            })
+            .delay((endTime - startTime) / msg.length);
+          });
+
+        // animate send button
+        $(":submit")
+          .delay(6400)
+          .queue(function() {
+            $(this).text("Searching...").prop("disabled", true).dequeue();
+          })
+          .delay(2000)
+          .queue(function() {
+            $(this).text("Redirecting").prop("disabled", false).dequeue();
+          })
+
+      })
+      .on("ended", function() {
+        window.location = "https://www.google.com/search?" + $.param({ q : msg });
+      });
+
+      $("#video").get(0).play();
+      
+    });
+    </script>
+  </body>
+</html>
