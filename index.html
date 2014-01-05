@@ -99,9 +99,8 @@
           of: "#video"
         });
 
-      $("#video").on("play", function() {
-        console.debug("Playing...");
-
+      $("#video").on("playing", function() {
+        
         // animate cursor
         $("#cursor")
           .delay(600)
