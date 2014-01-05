@@ -103,13 +103,13 @@
         
         // animate cursor
         $("#cursor")
-          .delay(600)
+          .delay(800)
           .animatePosition({
             my: "center top",
             at: "left+5% center+25%",
             of: "#message"
-          }, 1000)
-          .delay(3000)
+          }, 600)
+          .delay(3200)
           .animatePosition({
             my: "left top",
             at: "center center+25%",
@@ -120,11 +120,11 @@
         var startTime = 3200, endTime = 4200;
 
         $("#message")
-          .delay(2000)
+          .delay(1600)
           .queue(function() {
             $(this).focus().dequeue();          
           })
-          .delay(startTime - 2000)
+          .delay(startTime - 1600)
           .repeat(searchText.length, function(i) {
             return this.queue(function() {
               $(this).val(searchText.substr(0, i + 1)).dequeue();;  
