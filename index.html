@@ -2,6 +2,7 @@
 <html>
   <head>
     <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.css">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css">
     <style type="text/css">
     .cursor {
       width: 64px;
@@ -13,6 +14,31 @@
       width: 684px;
       padding-bottom: 24px;
     }
+
+    /* 
+    from http://jsfiddle.net/AndrewDryga/zcX4h/1/ 
+    */
+    .spinner {
+      display: inline-block;
+      opacity: 0;
+      width: 0;
+      padding-left: 8px;
+
+      -webkit-transition: opacity 0.25s, width 0.25s;
+      -moz-transition: opacity 0.25s, width 0.25s;
+      -o-transition: opacity 0.25s, width 0.25s;
+      transition: opacity 0.25s, width 0.25s;
+    }
+
+    .has-spinner.active .spinner {
+      opacity: 1;
+      width: auto; /* This doesn't work, just fix for unkown width elements */
+    }
+
+    .has-spinner.btn-large.active .spinner {
+        width: 19px;
+    }
+
     </style>
     <title>Let Minium google that for you</title>
   </head>
@@ -25,9 +51,12 @@
         <div class="form-group">
           <input type="text" id="message" name="message" class="form-control input-lg" autocomplete="off">
         </div>
-        <button type="submit" class="btn btn-lg btn-primary center-block" data-toggle="popover">Search Google</button>
+        <button type="submit" class="btn btn-default btn-lg center-block" data-style="expand-right" data-loading-text="Searching..." data-complete-text="Redirecting...">
+          
+          Search Google
+        </button>
       </form>
-      <img src="cursor.png" id="cursor" class="cursor" />
+      <img src="cursor.png" id="cursor" class="cursor" style="display: none" />
     </div>
     <!-- Scripts -->
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
@@ -35,6 +64,7 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-url-parser/2.2.1/purl.js"></script>
     <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
     <script>
+
     jQuery(function($) {
       $.fn.animatePosition = function(props, duration) {
         var mergedProps = $.extend({}, props, {  
@@ -53,13 +83,18 @@
         return that;
       };
 
+      $.fn.addSpinner = function() {
+        return $(this).append($("<span class='spinner'><i class='icon-spin icon-refresh'></i></span>")).addClass("has-spinner active");
+      }
+
       var url = $.url(window.location.toString());
-      var msg = url.param("msg") ? url.param("msg") : "Hello Minium!";
+      var searchText = url.param("q") ? url.param("q") : "Hello Minium!";
       
       // cursor initial position
       $("#cursor")
+        .show("fade", 50)
         .position({
-          my: "left top",
+          my: "right bottom",
           at: "right bottom",
           of: "#video"
         });
@@ -69,7 +104,7 @@
 
         // animate cursor
         $("#cursor")
-          .delay(1000)
+          .delay(600)
           .animatePosition({
             my: "center top",
             at: "left+5% center+25%",
@@ -91,27 +126,27 @@
             $(this).focus().dequeue();          
           })
           .delay(startTime - 2000)
-          .repeat(msg.length, function(i) {
+          .repeat(searchText.length, function(i) {
             return this.queue(function() {
-              $(this).val(msg.substr(0, i + 1)).dequeue();;  
+              $(this).val(searchText.substr(0, i + 1)).dequeue();;  
             })
-            .delay((endTime - startTime) / msg.length);
+            .delay((endTime - startTime) / searchText.length);
           });
 
         // animate send button
         $(":submit")
           .delay(6400)
           .queue(function() {
-            $(this).text("Searching...").prop("disabled", true).dequeue();
+            $(this).button("loading").removeClass("btn-default").addClass("btn-primary").addSpinner().dequeue();
           })
           .delay(2000)
           .queue(function() {
-            $(this).text("Redirecting").prop("disabled", false).dequeue();
+            $(this).button("complete").removeClass("btn-primary").addClass("btn-success").addSpinner().dequeue();
           })
 
       })
       .on("ended", function() {
-        window.location = "https://www.google.com/search?" + $.param({ q : msg });
+        window.location = "https://www.google.com/search?" + $.param({ q : searchText });
       });
 
       $("#video").get(0).play();
