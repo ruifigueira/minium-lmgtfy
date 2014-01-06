@@ -148,8 +148,15 @@
         window.location = "https://www.google.com/search?" + $.param({ q : searchText });
       });
 
-      $("#video").get(0).play();
-      
+      // check video to be ready, and then play it
+      var intervalId = setInterval(function() {
+        var video = $("#video").get(0);
+        if (video.readyState === 4) {
+          video.play();
+          clearInterval(intervalId);
+        }
+      }, 500);
+
     });
     </script>
   </body>
